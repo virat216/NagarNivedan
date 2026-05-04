@@ -40,7 +40,7 @@ fun PrimaryCardButton(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            // Icon
+
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -50,7 +50,7 @@ fun PrimaryCardButton(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Texts
+
             Column {
                 Text(
                     text = title,

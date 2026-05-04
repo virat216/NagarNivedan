@@ -37,7 +37,7 @@ fun HomeScreen(navController: NavController) {
                 .background(DisabledBg)
         ) {
 
-            // 🔹 Header Section
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -62,7 +62,7 @@ fun HomeScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 🔹 Primary Card (Register Complaint)
+
             PrimaryCardButton(
                 title = "Register New Complaint",
                 subtitle = "Report civic issues in your area",
@@ -74,7 +74,7 @@ fun HomeScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🔹 Secondary Card (Track Status)
+
             SecondaryCardButton(
                 title = "Track Complaint Status",
                 subtitle = "View status updates for complaints",

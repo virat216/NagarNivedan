@@ -13,34 +13,54 @@ import com.example.nagarnivedan.ui.theme.White
 @Composable
 fun BottomNavigationBar(navController: NavController) {
 
-    NavigationBar(
-        containerColor = White
-    ) {
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
+
+    NavigationBar(containerColor = White) {
 
         NavigationBarItem(
-            selected = true,
-            onClick = { navController.navigate("home") },
+            selected = currentRoute == "home",
+            onClick = {
+                navController.navigate("home") {
+                    popUpTo("home")
+                    launchSingleTop = true
+                }
+            },
             icon = { Icon(Icons.Default.Home, contentDescription = null) },
             label = { Text("Home") }
         )
 
         NavigationBarItem(
-            selected = false,
-            onClick = { navController.navigate("complaints") },
+            selected = currentRoute == "complaints",
+            onClick = {
+                navController.navigate("complaints") {
+                    popUpTo("home")
+                    launchSingleTop = true
+                }
+            },
             icon = { Icon(Icons.Default.List, contentDescription = null) },
             label = { Text("Complaints") }
         )
 
         NavigationBarItem(
-            selected = false,
-            onClick = { navController.navigate("alerts") },
+            selected = currentRoute == "alerts",
+            onClick = {
+                navController.navigate("alerts") {
+                    popUpTo("home")
+                    launchSingleTop = true
+                }
+            },
             icon = { Icon(Icons.Default.Notifications, contentDescription = null) },
             label = { Text("Alerts") }
         )
 
         NavigationBarItem(
-            selected = false,
-            onClick = { navController.navigate("profile") },
+            selected = currentRoute == "profile",
+            onClick = {
+                navController.navigate("profile") {
+                    popUpTo("home")
+                    launchSingleTop = true
+                }
+            },
             icon = { Icon(Icons.Default.Person, contentDescription = null) },
             label = { Text("Profile") }
         )

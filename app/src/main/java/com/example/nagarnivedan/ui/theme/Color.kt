@@ -20,17 +20,18 @@ val TextSecondary = Color(0xFF6B7280)
 val TextTertiary = Color(0xFF6B7280)
 val TextDisabled = Color(0xFF9CA3AF)
 
-// Background / Surface
+
 val White = Color(0xFFFFFFFF)
 val Border = Color(0xFFE5E7EB)
 val DisabledBg = Color(0xFFF3F4F6)
 
-// Status
+
 val StatusRegistered = Color(0xFF3B82F6)
 val StatusInProgress = Color(0xFFF59E0B)
 val StatusResolved = Color(0xFF16A34A)
 val StatusRejected = Color(0xFFDC2626)
 
-// Card
+
 val CardBg = Color(0xFFFFFFFF)
 val CardPressed = Color(0xFFF9FAFB)
+val StatusPending = Color(0xFF2196F3) // Blue

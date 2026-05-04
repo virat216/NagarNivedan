@@ -44,7 +44,7 @@ fun SecondaryCardButton(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            // Icon
+
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -54,7 +54,7 @@ fun SecondaryCardButton(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Texts
+
             Column {
                 Text(
                     text = title,
