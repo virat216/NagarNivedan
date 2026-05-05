@@ -5,15 +5,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.nagarnivedan.ui.theme.*
+import com.example.nagarnivedan.model.ComplaintDto
+import com.example.nagarnivedan.network.RetrofitClient
 import com.example.nagarnivedan.ui.components.StatusStep
+import com.example.nagarnivedan.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,18 +23,60 @@ fun ComplaintStatusScreen(
     complaintId: String
 ) {
 
+    var complaint by remember { mutableStateOf<ComplaintDto?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf("") }
 
-    val title = "Water Supply Issue"
-    val id= complaintId
-    val location = "Ward 14, Block 18, Ambedkar Nagar, Agra"
-    val description = "Water supply is completely disrupted for three days."
-    val lastUpdated = "12 Jan, 11:40 AM"
+    // 🔥 API CALL
+    LaunchedEffect(complaintId) {
+        try {
+            val response = RetrofitClient.apiService.getMyComplaints()
+
+            if (response.isSuccessful) {
+                val list = response.body()?.data ?: emptyList()
+
+                complaint = list.find { it.id == complaintId }
+
+                if (complaint == null) {
+                    errorMessage = "Complaint not found"
+                }
+
+            } else {
+                errorMessage = response.errorBody()?.string() ?: "Error"
+            }
+
+        } catch (e: Exception) {
+            errorMessage = e.message ?: "Network error"
+        }
+
+        isLoading = false
+    }
+
+    // 🔄 LOADING
+    if (isLoading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    // ❌ ERROR
+    if (errorMessage.isNotEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(errorMessage, color = MaterialTheme.colorScheme.error)
+        }
+        return
+    }
+
+    val data = complaint ?: return
+
+    val status = data.status ?: "Registered"
 
     val steps = listOf(
         "Complaint Registered" to true,
-        "Seen by admin" to true,
-        "Team Assigned / In Progress" to true,
-        "Complaint Resolved" to false
+        "Seen by admin" to (status == "In Progress" || status == "Resolved"),
+        "Team Assigned / In Progress" to (status == "In Progress" || status == "Resolved"),
+        "Complaint Resolved" to (status == "Resolved")
     )
 
     Scaffold(
@@ -42,7 +85,7 @@ fun ComplaintStatusScreen(
                 title = { Text("Complaint Status") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.Default.ArrowBack, null)
                     }
                 }
             )
@@ -63,9 +106,8 @@ fun ComplaintStatusScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
 
-
                     Text(
-                        text = title,
+                        text = data.title ?: "No Title",
                         color = BluePrimary,
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -73,23 +115,22 @@ fun ComplaintStatusScreen(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = "Complaint Refrence ID: $id",
+                        text = "Complaint Reference ID: ${data.id}",
                         color = TextSecondary,
                         style = MaterialTheme.typography.bodySmall
                     )
+
                     Spacer(modifier = Modifier.height(6.dp))
 
-
                     Text(
-                        text = location,
+                        text = data.location ?: "No location",
                         color = TextSecondary
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-
                     Text(
-                        text = description,
+                        text = data.description ?: "No description",
                         color = TextPrimary
                     )
 
@@ -99,11 +140,12 @@ fun ComplaintStatusScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-
-                    steps.forEachIndexed { index,(step, completed) ->
-                        StatusStep( text= step,
-                            completed= completed,
-                            isLast = index == steps.lastIndex)
+                    steps.forEachIndexed { index, (step, completed) ->
+                        StatusStep(
+                            text = step,
+                            completed = completed,
+                            isLast = index == steps.lastIndex
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
@@ -118,7 +160,7 @@ fun ComplaintStatusScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Last Updated: $lastUpdated",
+                        text = "Last Updated: ${data.updatedAt ?: "-"}",
                         color = TextSecondary,
                         style = MaterialTheme.typography.bodySmall
                     )

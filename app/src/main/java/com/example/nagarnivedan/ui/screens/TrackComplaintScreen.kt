@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +26,7 @@ fun TrackComplaintScreen(navController: NavController) {
                 title = { Text("Track Complaint") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.Default.ArrowBack, null)
                     }
                 }
             )
@@ -42,9 +43,7 @@ fun TrackComplaintScreen(navController: NavController) {
                     .padding(16.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(text = "Track Complaint",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text("Track Complaint")
             }
         }
     ) { padding ->
@@ -60,67 +59,29 @@ fun TrackComplaintScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = White),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 2.dp
-                )
+                elevation = CardDefaults.cardElevation(2.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
+                Column(modifier = Modifier.padding(16.dp)) {
 
                     Text(
                         text = "Enter the complaint reference ID to check its current status.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary.copy(alpha = 0.8f)
+                        color = TextSecondary
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-
                     OutlinedTextField(
                         value = referenceId,
                         onValueChange = { referenceId = it },
-                        placeholder = {
-                            Text(
-                                "Enter reference ID",
-                                color = TextSecondary.copy(alpha = 0.7f)
-                            )
-                        },
+                        placeholder = { Text("Enter reference ID") },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp), // same shape for both
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            color = TextPrimary // 👈 FIXED TEXT VISIBILITY
-                        ),
+                        shape = RoundedCornerShape(12.dp),
                         trailingIcon = {
-                            TextButton(
-                                onClick = {
-                                    // TODO: paste from clipboard later
-                                }
-                            ) {
-                                Text(
-                                    "Paste",
-                                    color = BluePrimary,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = BluePrimary,
-                            unfocusedBorderColor = Border.copy(alpha = 0.7f),
-                            cursorColor = BluePrimary
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "Example: ABC123456",
-                        color = TextSecondary.copy(alpha = 0.8f),
-                        style = MaterialTheme.typography.bodySmall
+                            Icon(Icons.Default.ContentPaste, null)
+                        }
                     )
                 }
             }

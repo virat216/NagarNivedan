@@ -4,20 +4,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.nagarnivedan.navigation.AppNavigation
+import com.example.nagarnivedan.network.RetrofitClient
 import com.example.nagarnivedan.ui.theme.NagarNivedanTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 🔥 VERY IMPORTANT — initialize Retrofit with context
+        RetrofitClient.init(applicationContext)
+
         enableEdgeToEdge()
+
         setContent {
             NagarNivedanTheme {
                 AppNavigation()

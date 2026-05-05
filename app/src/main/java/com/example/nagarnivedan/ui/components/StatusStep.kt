@@ -20,10 +20,17 @@ fun StatusStep(
     completed: Boolean,
     isLast: Boolean
 ) {
-    Row (modifier = Modifier.fillMaxWidth()){
-        Column (
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp), // 🔥 spacing between steps
+        verticalAlignment = Alignment.Top
+    ) {
+
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Icon(
                 imageVector = if (completed)
                     Icons.Default.CheckCircle
@@ -32,23 +39,29 @@ fun StatusStep(
                 contentDescription = null,
                 tint = if (completed) BluePrimary else Border
             )
+
             if (!isLast) {
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Box(
                     modifier = Modifier
                         .width(2.dp)
-                        .height(24.dp)
+                        .height(32.dp) // 🔥 taller line looks better
                         .background(
-                            if (completed) BluePrimary else Border.copy(alpha = 0.5f)
+                            if (completed) BluePrimary
+                            else Border.copy(alpha = 0.5f)
                         )
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(12.dp))
 
-        Text(
-            text = text,
-            color = if (completed) TextPrimary else TextSecondary
-        )
+        Column {
+            Text(
+                text = text,
+                color = if (completed) TextPrimary else TextSecondary
+            )
+        }
     }
 }

@@ -6,6 +6,7 @@ data class Alert(
     val location: String,
     val time: String,
     val description: String,
+    val category: String,
     val type: String,
     var isRead: Boolean = false
 )

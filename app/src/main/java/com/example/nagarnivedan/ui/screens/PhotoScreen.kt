@@ -1,6 +1,7 @@
 package com.example.nagarnivedan.ui.screens
 
 import android.net.Uri
+import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -31,16 +32,23 @@ fun PhotoScreen(navController: NavController) {
 
     var photoAdded by remember { mutableStateOf(false) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
-    var isClicked by remember { mutableStateOf(false) }
 
+    // 🔥 MULTIPLE IMAGE PICKER
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageUri = uri
-        photoAdded = uri != null
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris ->
+        if (uris.isNotEmpty()) {
+            ComplaintDraft.imageUris.clear()
+            ComplaintDraft.imageUris.addAll(uris)
+
+            photoAdded = true
+            imageUri = uris.first()   // show first image
+        }
     }
 
-    var capturedImage by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
+    // 📸 CAMERA (preview only for now)
+    var capturedImage by remember { mutableStateOf<Bitmap?>(null) }
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
@@ -48,6 +56,9 @@ fun PhotoScreen(navController: NavController) {
         if (bitmap != null) {
             photoAdded = true
             imageUri = null
+
+            // ⚠️ Camera image not uploaded yet
+            ComplaintDraft.imageUris.clear()
         }
     }
 
@@ -93,6 +104,7 @@ fun PhotoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // 🔲 IMAGE PREVIEW BOX
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -138,48 +150,50 @@ fun PhotoScreen(navController: NavController) {
                     )
                 }
             }
-            if(imageUri != null){
+
+            // ✅ STATUS TEXT
+            if (ComplaintDraft.imageUris.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Row (
-                    verticalAlignment = Alignment.CenterVertically,
-                ){
-                    Text(
-                        text = "Photo added ✓",
-                        color = StatusResolved,
-                    )
-                }
+                Text(
+                    text = "${ComplaintDraft.imageUris.size} photo(s) selected ✓",
+                    color = StatusResolved
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // 📸 CAMERA BUTTON
             OutlinedButton(
                 onClick = {
                     cameraLauncher.launch(null)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = TextPrimary),
+                    containerColor = TextPrimary
+                ),
                 border = BorderStroke(
                     1.dp,
                     Border.copy(alpha = 0.8f)
                 )
             ) {
-                Text(
-                    text = "Take Photo",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text("Take Photo")
             }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            val isSelected = imageUri != null
+            // 🖼️ GALLERY BUTTON
+            val isSelected = ComplaintDraft.imageUris.isNotEmpty()
+
             OutlinedButton(
                 onClick = {
                     launcher.launch("image/*")
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = if (isSelected) BluePrimary.copy(alpha = 0.1f) else White,
+                    containerColor = if (isSelected)
+                        BluePrimary.copy(alpha = 0.1f)
+                    else White,
                     contentColor = TextPrimary
                 ),
                 border = BorderStroke(
@@ -187,10 +201,7 @@ fun PhotoScreen(navController: NavController) {
                     if (isSelected) BluePrimary else Border.copy(alpha = 0.8f)
                 )
             ) {
-                Text(
-                    text = "Add Photo",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text("Add Photos")
             }
         }
     }

@@ -17,9 +17,13 @@ import com.example.nagarnivedan.ui.screens.MyComplaintsScreen
 import com.example.nagarnivedan.ui.screens.AlertsScreen
 import com.example.nagarnivedan.ui.screens.AlertDetailScreen
 import com.example.nagarnivedan.ui.screens.ProfileScreen
+import com.example.nagarnivedan.ui.screens.RegisterScreen
 import com.example.nagarnivedan.ui.screens.EditProfileScreen
 import com.example.nagarnivedan.ui.screens.ChangePasswordScreen
 import com.example.nagarnivedan.ui.screens.ChangeAreaScreen
+import androidx.compose.ui.platform.LocalContext
+import com.example.nagarnivedan.data.SessionManager
+import com.example.nagarnivedan.ui.screens.LoginScreen
 
 
 
@@ -27,11 +31,34 @@ import com.example.nagarnivedan.ui.screens.ChangeAreaScreen
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    val session = SessionManager(context)
+
+    val startDestination = if (session.isLoggedIn()) "home" else "login"
 
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = startDestination
     ) {
+
+        composable("register") {
+            RegisterScreen(
+                navController = navController,   // 🔥 ADD THIS
+                onRegisterSuccess = {
+                    navController.navigate("login")
+                }
+            )
+        }
+        composable("login") {
+            LoginScreen(
+                navController = navController,
+                onLoginSuccess = {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
+        }
 
         composable("home") {
             HomeScreen(navController)

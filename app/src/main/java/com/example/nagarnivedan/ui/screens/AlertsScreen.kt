@@ -1,5 +1,6 @@
 package com.example.nagarnivedan.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,29 +11,48 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.nagarnivedan.data.Alert
+import com.example.nagarnivedan.model.AlertDto
+import com.example.nagarnivedan.network.RetrofitClient
 import com.example.nagarnivedan.ui.components.AlertItem
 import com.example.nagarnivedan.ui.theme.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlertsScreen(navController: NavController) {
 
-    val alerts = remember {
-        mutableStateListOf(
-            Alert("1", "Water Supply Interruption", "Ward 5", "Now", "", "Water", false),
-            Alert("2", "Road Closure", "Ward 5", "2h", "", "Road", true),
-            Alert("3", "Power Outage", "Ward 5", "2h", "", "Electricity", false),
-            Alert("4", "Fog Alert", "Ward 5", "2h", "", "Weather", true)
-        )
+    val scope = rememberCoroutineScope()
+
+    var alerts by remember { mutableStateOf<List<AlertDto>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    // 🔥 API CALL
+    LaunchedEffect(Unit) {
+        scope.launch {
+            try {
+                val response = RetrofitClient.apiService.getAlerts()
+
+                if (response.isSuccessful) {
+                    alerts = response.body()?.data ?: emptyList()
+                } else {
+                    errorMessage = response.errorBody()?.string() ?: "Error fetching alerts"
+                }
+
+            } catch (e: Exception) {
+                errorMessage = e.message ?: "Network error"
+                Log.d("ALERTS", "Exception: ${e.message}")
+            }
+
+            isLoading = false
+        }
     }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -46,94 +66,109 @@ fun AlertsScreen(navController: NavController) {
         }
     ) { padding ->
 
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(White),
-            contentPadding = PaddingValues(bottom = 16.dp)
+                .background(White)
         ) {
 
+            // 🔄 LOADING
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+                return@Column
+            }
 
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = DisabledBg)
-                ) {
+            // ❌ ERROR
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
 
-                    Row(
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+
+                // 🔹 HEADER CARD (unchanged UI)
+                item {
+                    Card(
                         modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = DisabledBg)
                     ) {
-
-
-                        Box(
+                        Row(
                             modifier = Modifier
-                                .size(48.dp)
-                                .background(
-                                    BluePrimary.copy(alpha = 0.15f),
-                                    CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                Icons.Default.Notifications,
-                                contentDescription = null,
-                                tint = BluePrimary
-                            )
-                        }
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(
+                                        BluePrimary.copy(alpha = 0.15f),
+                                        CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.Notifications,
+                                    contentDescription = null,
+                                    tint = BluePrimary
+                                )
+                            }
 
-                        Column(modifier = Modifier.weight(1f)) {
+                            Spacer(modifier = Modifier.width(12.dp))
 
-                            Text(
-                                text = "Stay updated!",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = TextPrimary
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Stay updated!",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = TextPrimary
+                                )
 
-                            Text(
-                                text = "Important alerts and notifications from your city.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TextSecondary
-                            )
-                        }
-
-
-                        Box(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .background(StatusRejected, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "1",
-                                color = White,
-                                style = MaterialTheme.typography.labelSmall
-                            )
+                                Text(
+                                    text = "Important alerts and notifications from your city.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
                         }
                     }
                 }
-            }
 
+                // 🔥 REAL DATA
+                items(alerts) { alert ->
 
-            items(alerts) { alert ->
-                AlertItem(
-                    alert = alert,
-                    onClick =
-                        {
-                            alert.isRead = true
+                    // Convert AlertDto → UI Alert model
+                    val uiAlert = com.example.nagarnivedan.data.Alert(
+                        id = alert.id ?: "",
+                        title = alert.title ?: "No Title",
+                        location = "",
+                        time = alert.date ?: "",
+                        description = alert.message ?: "",
+                        category = "General",
+                        isRead = false,
+                        type = "info"
+                    )
+
+                    AlertItem(
+                        alert = uiAlert,
+                        onClick = {
                             navController.navigate("alert_detail/${alert.id}")
                         }
-                )
+                    )
+                }
             }
         }
-
     }
 }

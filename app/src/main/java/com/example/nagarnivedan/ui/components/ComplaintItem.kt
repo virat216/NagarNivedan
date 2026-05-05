@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.nagarnivedan.data.Complaint
 import com.example.nagarnivedan.ui.theme.*
+import com.example.nagarnivedan.model.ComplaintDto
 import com.example.nagarnivedan.ui.theme.TextPrimary
 import com.example.nagarnivedan.ui.theme.TextSecondary
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,7 +28,7 @@ import com.example.nagarnivedan.ui.theme.StatusRejected
 
 @Composable
 fun ComplaintItem(
-    complaint: Complaint,
+    complaint: ComplaintDto,
     onClick: () -> Unit
 ) {
 
@@ -79,7 +80,7 @@ fun ComplaintItem(
             Column(modifier = Modifier.weight(1f)) {
 
                 Text(
-                    text = complaint.title,
+                    text = complaint.title?.toString() ?: "",
                     style = MaterialTheme.typography.titleMedium,
                     color = TextPrimary
                 )
@@ -87,7 +88,7 @@ fun ComplaintItem(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = complaint.description,
+                    text = complaint.description ?: "",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextSecondary,
                     maxLines = 1
@@ -106,7 +107,7 @@ fun ComplaintItem(
                 Spacer(modifier = Modifier.width(6.dp))
 
                 Text(
-                    text = complaint.status,
+                    text = complaint.status ?: "",
                     color = statusColor,
                     style = MaterialTheme.typography.bodySmall
                 )
